@@ -141,3 +141,255 @@ def tokens_to_string(tokens):
 
 
     return token_text
+
+# ============================================================
+# RECURSIVE DESCENT PARSER
+# ============================================================
+
+
+# ------------------------------------------------------------
+# EXPRESSION LEVEL
+# Handles + and -
+# ------------------------------------------------------------
+
+def parse_expression(tokens, position):
+
+    left, position = parse_term(tokens, position)
+
+    while (
+        tokens[position][0] == "OP"
+        and tokens[position][1] in "+-"
+    ):
+
+        operator = tokens[position][1]
+
+        position += 1
+
+        right, position = parse_term(tokens, position)
+
+        left = (
+            "binary",
+            operator,
+            left,
+            right
+        )
+
+    return left, position
+
+
+# ------------------------------------------------------------
+# TERM LEVEL
+# Handles *, /, %, and implicit multiplication
+# ------------------------------------------------------------
+
+def parse_term(tokens, position):
+
+    left, position = parse_unary(tokens, position)
+
+    while True:
+
+        # Normal multiplication, division, or modulus
+        if (
+            tokens[position][0] == "OP"
+            and tokens[position][1] in "*/%"
+        ):
+
+            operator = tokens[position][1]
+
+            position += 1
+
+            right, position = parse_unary(
+                tokens,
+                position
+            )
+
+            left = (
+                "binary",
+                operator,
+                left,
+                right
+            )
+
+
+        # Implicit multiplication
+        # Example: 2(3 + 4)
+        elif tokens[position][0] == "LPAREN":
+
+            right, position = parse_unary(
+                tokens,
+                position
+            )
+
+            left = (
+                "binary",
+                "*",
+                left,
+                right
+            )
+
+
+        # Implicit multiplication
+        # Example: (2 + 3)4
+        elif (
+            tokens[position][0] == "NUM"
+            and position > 0
+            and tokens[position - 1][0] == "RPAREN"
+        ):
+
+            right, position = parse_unary(
+                tokens,
+                position
+            )
+
+            left = (
+                "binary",
+                "*",
+                left,
+                right
+            )
+
+
+        else:
+
+            break
+
+    return left, position
+
+
+# ------------------------------------------------------------
+# UNARY LEVEL
+# Handles unary -
+# ------------------------------------------------------------
+
+def parse_unary(tokens, position):
+
+    # Unary negative
+    if (
+        tokens[position][0] == "OP"
+        and tokens[position][1] == "-"
+    ):
+
+        position += 1
+
+        operand, position = parse_unary(
+            tokens,
+            position
+        )
+
+        return (
+            "neg",
+            operand
+        ), position
+
+
+    # Unary + is not supported
+    elif (
+        tokens[position][0] == "OP"
+        and tokens[position][1] == "+"
+    ):
+
+        raise ValueError
+
+
+    return parse_power(tokens, position)
+
+
+# ------------------------------------------------------------
+# POWER LEVEL
+# Handles ^
+# ------------------------------------------------------------
+
+def parse_power(tokens, position):
+
+    left, position = parse_primary(
+        tokens,
+        position
+    )
+
+    # Exponentiation is right associative
+    if (
+        tokens[position][0] == "OP"
+        and tokens[position][1] == "^"
+    ):
+
+        position += 1
+
+        right, position = parse_unary(
+            tokens,
+            position
+        )
+
+        left = (
+            "binary",
+            "^",
+            left,
+            right
+        )
+
+    return left, position
+
+
+# ------------------------------------------------------------
+# PRIMARY LEVEL
+# Handles numbers and parentheses
+# ------------------------------------------------------------
+
+def parse_primary(tokens, position):
+
+    token_type = tokens[position][0]
+    token_value = tokens[position][1]
+
+
+    # Number
+    if token_type == "NUM":
+
+        position += 1
+
+        return (
+            "number",
+            token_value
+        ), position
+
+
+    # Parenthesised expression
+    elif token_type == "LPAREN":
+
+        position += 1
+
+        node, position = parse_expression(
+            tokens,
+            position
+        )
+
+        # Must have closing parenthesis
+        if tokens[position][0] != "RPAREN":
+
+            raise ValueError
+
+        position += 1
+
+        return node, position
+
+
+    else:
+
+        raise ValueError
+
+
+# ------------------------------------------------------------
+# PARSE COMPLETE TOKEN LIST
+# ------------------------------------------------------------
+
+def parse_tokens(tokens):
+
+    tree, position = parse_expression(
+        tokens,
+        0
+    )
+
+    # A valid expression must end at END
+    if tokens[position][0] != "END":
+
+        raise ValueError
+
+    return tree
