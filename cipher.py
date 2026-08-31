@@ -210,3 +210,33 @@ def verify_files(original_path: str,
         decrypted_text = file.read()
 
     return original_text == decrypted_text
+
+
+# ------------------------------------------------------------
+# MAIN PROGRAM
+# ------------------------------------------------------------
+
+if __name__ == "__main__":
+
+    shift1 = int(input("Enter shift1: "))
+    shift2 = int(input("Enter shift2: "))
+
+    encrypt_file(
+        shift1,
+        shift2,
+        "raw_text.txt",
+        "encrypted_text.txt"
+    )
+
+    decrypt_file(
+        shift1,
+        shift2,
+        "encrypted_text.txt",
+        "decrypted_text.txt"
+    )
+
+    if verify_files("raw_text.txt", "decrypted_text.txt"):
+        print("Decryption successful: decrypted text matches original text.")
+    else:
+        print("Decryption failed: decrypted text does not match original text.")
+
