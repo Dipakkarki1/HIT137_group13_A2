@@ -592,3 +592,158 @@ def evaluate_expression(expression):
         "tokens": token_text,
         "result": result
     }
+
+# ============================================================
+# RESULT FORMATTING
+# ============================================================
+
+def format_result(value):
+
+    # If the result is a whole number,
+    # display it without a decimal point
+    if value.is_integer():
+
+        return str(int(value))
+
+
+    # Otherwise round to 4 decimal places
+    result = f"{value:.4f}"
+
+    # Remove unnecessary zeros
+    result = result.rstrip("0")
+    result = result.rstrip(".")
+
+    return result
+
+
+# ============================================================
+# EVALUATE INPUT FILE
+# ============================================================
+
+def evaluate_file(input_path: str) -> list[dict]:
+
+    results = []
+
+
+    # --------------------------------------------------------
+    # READ EXPRESSIONS FROM INPUT FILE
+    # --------------------------------------------------------
+
+    with open(input_path, "r", encoding="utf-8") as file:
+
+        lines = file.readlines()
+
+
+    # --------------------------------------------------------
+    # EVALUATE EACH EXPRESSION
+    # --------------------------------------------------------
+
+    for line in lines:
+
+        # Remove only the newline at the end.
+        # Keep the original expression otherwise unchanged.
+        expression = line.rstrip("\r\n")
+
+        result = evaluate_expression(expression)
+
+        results.append(result)
+
+
+    # --------------------------------------------------------
+    # FIND OUTPUT FILE LOCATION
+    # --------------------------------------------------------
+
+    slash_position = -1
+
+
+    for i in range(len(input_path)):
+
+        if input_path[i] == "/" or input_path[i] == "\\":
+
+            slash_position = i
+
+
+    # Input file is in the current folder
+    if slash_position == -1:
+
+        output_path = "output.txt"
+
+
+    # Input file is inside another folder
+    else:
+
+        output_path = (
+            input_path[:slash_position + 1]
+            + "output.txt"
+        )
+
+
+    # --------------------------------------------------------
+    # WRITE OUTPUT.TXT
+    # --------------------------------------------------------
+
+    with open(output_path, "w", encoding="utf-8") as file:
+
+
+        for i in range(len(results)):
+
+            item = results[i]
+
+
+            # Input
+            file.write(
+                "Input: "
+                + item["input"]
+                + "\n"
+            )
+
+
+            # Tree
+            file.write(
+                "Tree: "
+                + item["tree"]
+                + "\n"
+            )
+
+
+            # Tokens
+            file.write(
+                "Tokens: "
+                + item["tokens"]
+                + "\n"
+            )
+
+
+            # Result
+            if item["result"] == "ERROR":
+
+                file.write(
+                    "Result: ERROR\n"
+                )
+
+
+            else:
+
+                file.write(
+                    "Result: "
+                    + format_result(item["result"])
+                    + "\n"
+                )
+
+
+            # Add a blank line between expressions
+            if i < len(results) - 1:
+
+                file.write("\n")
+
+
+    return results
+
+
+# ============================================================
+# MAIN PROGRAM
+# ============================================================
+
+if __name__ == "__main__":
+
+    evaluate_file("sample_input.txt")
