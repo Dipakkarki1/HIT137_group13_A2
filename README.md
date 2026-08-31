@@ -24,3 +24,32 @@ Develop a mathematical expression evaluator using tokenisation and recursive des
 ## Collaboration
 
 All three of us will contribute to the development, testing, review, and documentation of the assessment through this repository.
+
+## Contribution Summary
+
+### Aavash Khatiwada
+- Implemented Question 1 encryption logic
+- Implemented Question 2 tokenisation and token formatting
+- Implemented Question 2 file evaluation and output generation
+- Performed final testing and output verification
+
+### Dipak Karki
+- Implemented Question 1 decryption and verification
+- Implemented the recursive descent parser for Question 2
+- Assisted with integration and testing
+
+### Abiud Kiprop
+- Implemented the Question 1 main execution section
+- Implemented expression tree formatting and evaluation for Question 2
+- Assisted with integration and testing
+
+## Files
+
+- `cipher.py` - Question 1 encryption, decryption and verification
+- `raw_text.txt` - Original input text
+- `encrypted_text.txt` - Generated encrypted text
+- `decrypted_text.txt` - Generated decrypted text
+- `evaluator.py` - Question 2 expression evaluator
+- `sample_input.txt` - Provided sample expressions
+- `sample_output.txt` - Provided expected sample output
+- `output.txt` - Generated evaluator output
