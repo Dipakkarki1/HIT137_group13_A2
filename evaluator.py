@@ -6,7 +6,7 @@
 # Group Members:
 # Aavash Khatiwada - S405266
 # Dipak Karki - S407785
-# Abid Kirpor - S399375
+# Abiud Kiprop - S399375
 
 
 # ------------------------------------------------------------
