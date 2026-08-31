@@ -393,3 +393,202 @@ def parse_tokens(tokens):
         raise ValueError
 
     return tree
+
+
+# ============================================================
+# TREE FORMATTING
+# ============================================================
+
+def format_number(number_text):
+
+    number = float(number_text)
+
+    if number.is_integer():
+        return str(int(number))
+
+    return str(number)
+
+
+def tree_to_string(tree):
+
+    node_type = tree[0]
+
+    if node_type == "number":
+
+        return format_number(tree[1])
+
+
+    elif node_type == "neg":
+
+        operand = tree_to_string(tree[1])
+
+        return "(neg " + operand + ")"
+
+
+    elif node_type == "binary":
+
+        operator = tree[1]
+
+        left = tree_to_string(tree[2])
+        right = tree_to_string(tree[3])
+
+        return (
+            "("
+            + operator
+            + " "
+            + left
+            + " "
+            + right
+            + ")"
+        )
+
+
+# ============================================================
+# EXPRESSION EVALUATION
+# ============================================================
+
+def evaluate_tree(tree):
+
+    node_type = tree[0]
+
+
+    # Number
+    if node_type == "number":
+
+        return float(tree[1])
+
+
+    # Unary negative
+    elif node_type == "neg":
+
+        value = evaluate_tree(tree[1])
+
+        return -value
+
+
+    # Binary operation
+    elif node_type == "binary":
+
+        operator = tree[1]
+
+        left = evaluate_tree(tree[2])
+        right = evaluate_tree(tree[3])
+
+
+        if operator == "+":
+
+            return left + right
+
+
+        elif operator == "-":
+
+            return left - right
+
+
+        elif operator == "*":
+
+            return left * right
+
+
+        elif operator == "/":
+
+            if right == 0:
+                raise ZeroDivisionError
+
+            return left / right
+
+
+        elif operator == "%":
+
+            if right == 0:
+                raise ZeroDivisionError
+
+            return left % right
+
+
+        elif operator == "^":
+
+            value = left ** right
+
+            if isinstance(value, complex):
+                raise ValueError
+
+            return value
+
+
+    raise ValueError
+
+
+# ============================================================
+# EVALUATE ONE EXPRESSION
+# ============================================================
+
+def evaluate_expression(expression):
+
+    tokens = tokenize(expression)
+
+
+    # Tokenisation error
+    if tokens is None:
+
+        return {
+            "input": expression,
+            "tree": "ERROR",
+            "tokens": "ERROR",
+            "result": "ERROR"
+        }
+
+
+    token_text = tokens_to_string(tokens)
+
+
+    # Parsing
+    try:
+
+        tree = parse_tokens(tokens)
+
+        tree_text = tree_to_string(tree)
+
+
+    except (ValueError, IndexError):
+
+        return {
+            "input": expression,
+            "tree": "ERROR",
+            "tokens": token_text,
+            "result": "ERROR"
+        }
+
+
+    # Evaluation
+    try:
+
+        result = evaluate_tree(tree)
+
+        result = float(result)
+
+
+        if (
+            result != result
+            or result == float("inf")
+            or result == float("-inf")
+        ):
+
+            raise ValueError
+
+
+    except (
+        ValueError,
+        ZeroDivisionError,
+        OverflowError
+    ):
+
+        result = "ERROR"
+
+
+    return {
+        "input": expression,
+        "tree": tree_text,
+        "tokens": token_text,
+        "result": result
+    }
